@@ -1,5 +1,5 @@
 {% for libro in libros %}
-<form id="view_form" method="POST" action="/updatelibros/{{ libro.0 }}">
+<form id="view_form_{{ libro.0 }}" method="POST" action="/updatelibros">
     <table class="table table-hover">
         <tr>
             <th>ID</th>
@@ -23,7 +23,7 @@
         </tr>
 
         <tr>
-            <input type="hidden" name="idLibro" id="idLibro" value="{{ libro.0 }}">
+            <input type="hidden" name="idLibro" id="idLibro_{{ libro.0 }}" value="{{ libro.0 }}">
             <th colspan="2">
                 <a href="/deletelibros/{{ libro.0 }}" class="btn btn-outline btn-danger" onclick="return confirm('¿Está seguro de eliminar este registro?')">Eliminar</a>
                 <button type="submit" class="btn btn-outline btn-success">Actualizar</button>

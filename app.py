@@ -44,7 +44,7 @@ def viewestudiantes():
 @app.route('/updateestudiantes', methods=['GET', 'POST'])
 def updateestudiantes():
     if request.method == 'POST':
-        estudiantesId = request.form.get('id') 
+        estudiantesId = request.form['id'] 
         nombre = request.form['nombre']
         apellido = request.form['apellido']
         edad = request.form['edad']
@@ -102,27 +102,27 @@ def addlibros():
         flash("Libro registrado correctamente") 
     return redirect(url_for('libros'))
 
-@app.route('/updatelibros', methods=['GET', 'POST'])
+@app.route('/updatelibros', methods=['POST'])
 def updatelibros():
     if request.method == 'POST':
-        librosId = request.form.get('idLibro') 
+        libroId = request.form.get['idLibro']
         titulo = request.form['titulo']
         cantidad = request.form['cantidad']
         autor = request.form['autor']
         anio = request.form['anio']
         link = mysql.connection.cursor()
-        link.execute("UPDATE tblibros SET titulo=%s, cantidad=%s, autor=%s, anio=%s WHERE idLibro=%s", (titulo, cantidad, autor, anio, librosId))
+        link.execute("UPDATE tblibros SET titulo=%s, cantidad=%s, autor=%s, anio=%s WHERE idLibro=%s", (titulo, cantidad, autor, anio, libroId))
         mysql.connection.commit()
         link.close()
         flash("Libro actualizado correctamente")
         return redirect(url_for('libros'))
-@app.route('/deletelibros/<string:librosId>', methods=['POST', 'GET'])
-def deletelibros(librosId): 
+@app.route('/deletelibros/<string:idLibro>', methods=['POST', 'GET'])
+def deletelibros(idLibro): 
     if request.method == 'GET': 
         link = mysql.connection.cursor() 
-        sql = "DELETE FROM tblibros WHERE id=%s" 
-        librosId = (librosId, )
-        link.execute(sql, librosId) 
+        sql = "DELETE FROM tblibros WHERE idLibro=%s" 
+        idLibros = (idLibro, )
+        link.execute(sql, idLibros) 
         mysql.connection.commit() 
         link.close() 
         flash("Libro eliminado correctamente") 
