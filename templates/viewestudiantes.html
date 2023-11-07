@@ -1,0 +1,39 @@
+{% for estudiante in estudiantes %}
+<form id="view_form" method="POST" action="/updateestudiantes">
+    <table class="table table-hover">
+        <tr>
+            <th>ID</th>
+            <th>{{estudiante.0}}</th>
+        </tr>
+        <tr>
+            <th>Nombre</th>
+            <th><input type="text" value="{{estudiante.1}}" name="nombre" id="nombre" class="form-control" required="true">
+            </th>
+        </tr>
+        <tr>
+            <th>Apellido</th>
+            <th><input type="text" value="{{estudiante.2}}" name="apellido" id="apellido" class="form-control" required="true">
+            </th>
+        </tr>
+        <tr>
+            <th>Edad</th>
+            <th><input type="text" value="{{estudiante.3}}" name="edad" id="edad" class="form-control" required="true">
+            </th>
+        </tr>
+        <tr>
+            <th>Carrera</th>
+            <th><input type="text" value="{{estudiante.4}}" name="carrera" id="carrera" class="form-control"
+                    required="true"></th>
+        </tr>
+
+        <tr>
+            <input type="hidden" name="estudiantesId" id="estudiantesId" value="{{ estudiante.0 }}">
+            <th colspan="2">
+                <a href="/deleteestudiantes/{{estudiante.0}}" class="btn btn-outline btn-danger"
+                    onclick="return confirm('Esta seguro de eliminar este registro?')">Eliminar</a>
+                <button type="submit" class="btn btn-outline btn-success">Actualizar</button>
+            </th>
+        </tr>
+    </table>
+</form>
+{% endfor %}

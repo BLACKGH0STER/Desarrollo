@@ -1,0 +1,34 @@
+{% for libro in libros %}
+<form id="view_form" method="POST" action="/updatelibros/{{ libro.0 }}">
+    <table class="table table-hover">
+        <tr>
+            <th>ID</th>
+            <th>{{ libro.0 }}</th>
+        </tr>
+        <tr>
+            <th>Titulo</th>
+            <th><input type="text" value="{{ libro.1 }}" name="titulo" id="titulo" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <th>Cantidad</th>
+            <th><input type="text" value="{{ libro.2 }}" name="cantidad" id="cantidad" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <th>Autor</th>
+            <th><input type="text" value="{{ libro.3 }}" name="autor" id="autor" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <th>Año</th>
+            <th><input type="text" value="{{ libro.4 }}" name="anio" id="anio" class="form-control" required="true"></th>
+        </tr>
+
+        <tr>
+            <input type="hidden" name="idLibro" id="idLibro" value="{{ libro.0 }}">
+            <th colspan="2">
+                <a href="/deletelibros/{{ libro.0 }}" class="btn btn-outline btn-danger" onclick="return confirm('¿Está seguro de eliminar este registro?')">Eliminar</a>
+                <button type="submit" class="btn btn-outline btn-success">Actualizar</button>
+            </th>
+        </tr>
+    </table>
+</form>
+{% endfor %}

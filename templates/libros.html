@@ -1,0 +1,156 @@
+{% extends 'header.html' %}
+{% block body %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <form role="form">
+                <p class="text-center">
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#NewField" class="btn btn-primary">
+                        Insertar nuevo libro
+                    </button>
+                </p>
+            </form>
+        </div>
+
+        <div class="col-md-12">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for mensaje in messages %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" id="success-alert"> <strong>{{
+                    mensaje }}</strong> <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            {% block content%}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titulo</th>
+                        <th>Cantidad</th>
+                        <th>Autor</th>
+                        <th>Año</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for libro in libros %}
+                    <tr>
+                        <td>{{ libro.0 }}</td>
+                        <td>{{ libro.1 }}</td>
+                        <td>{{ libro.2 }}</td>
+                        <td>{{ libro.3 }}</td>
+                        <td>{{ libro.4 }}</td>
+                        <td><button type="button" data-id="{{ libro.0 }}" class="usersInfo btn btn-success"
+                                title="Detalles">Detalles</button></td>
+                    </tr>
+                    {% endfor%}
+                </tbody>
+            </table>
+            {% endblock%}
+        </div>
+    </div>
+
+    <div class="modal fade" id="NewField" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Registro de un nuevo libro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="insert_form" method="POST" action="/addlibros">
+                    <div class="modal-body">
+                        <table class="table table-hover">
+                            <tr>
+                                <th>ID</th>
+                                <th><input type="text" name="idLibro" id="idLibro" class="form-control" required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Titulo</th>
+                                <th><input type="text" name="titulo" id="titulo" class="form-control" required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Cantidad</th>
+                                <th><input type="text" name="cantidad" id="cantidad" class="form-control" required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Autor</th>
+                                <th><input type="text" name="autor" id="autor" class="form-control" required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Año</th>
+                                <th><input type="text" name="anio" id="anio" class="form-control"
+                                        required="true"></th>
+                            </tr>
+
+                            <tr>
+                                <th colspan="2"><button type="submit" class="btn btn-primary">Registrar libro</button>
+                                </th>
+                            </tr>
+                        </table>
+                    </div>
+                </form>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="viewField" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Vista de un libro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-cuerpo">
+
+                </div>
+                
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#success-alert").fadeTo(3000, 500).slideUp(500, function () {
+            $("#success-alert").slideUp(500);
+        });
+        $('.usersInfo').click(function () {
+            var idLibro = $(this).data('idLibro');
+            $.ajax({
+                url: '/viewlibros',
+                type: 'POST',
+                data: { idLibro: idLibro },
+                success: function (data) {
+                    $('.modal-cuerpo').html(data);
+                    $('.modal-cuerpo').append(data.htmlresponse);
+                    $('#viewField').modal('show');
+                }
+            });
+        });
+    }); 
+</script>
+{% endblock %}
