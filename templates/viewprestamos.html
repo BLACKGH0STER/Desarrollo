@@ -1,0 +1,37 @@
+{% for prestamo in prestamos %}
+<form id="update_form_{{ prestamo.0 }}" method="POST" action="/updateprestamos">
+    <table class="table table-hover">
+        <tr>
+            <th>ID Prestamo</th>
+            <th>{{ prestamo.0 }}</th>
+        </tr>
+        <tr>
+            <th>ID estudiante</th>
+            <th><input type="text" value="{{ prestamo.1 }}" name="id" id="id" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <th>ID libro</th>
+            <th><input type="text" value="{{ prestamo.2 }}" name="idlibro" id="idlibro" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <th>Fecha prestamo</th>
+            <th><input type="text" value="{{ prestamo.3 }}" name="fechaprestamo" id="fechaprestamo" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <th>Fecha devolución</th>
+            <th><input type="text" value="{{ prestamo.4 }}" name="fechadevolucion" id="fechadevolucion" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <th>Estado</th>
+            <th><input type="text" value="{{ prestamo.5 }}" name="estadoprestamo" id="estadoprestamo" class="form-control" required="true"></th>
+        </tr>
+        <tr>
+            <input type="hidden" name="idprestamo" id="idprestamo" value="{{ prestamo.0 }}">
+            <th colspan="2">
+                <a href="/deleteprestamos/{{ prestamo.0 }}" class="btn btn-outline btn-danger" onclick="return confirm('¿Está seguro de eliminar este registro?')">Eliminar</a>
+                <button type="submit" class="btn btn-outline btn-success">Actualizar</button>
+            </th>
+        </tr>
+    </table>
+</form>
+{% endfor %}

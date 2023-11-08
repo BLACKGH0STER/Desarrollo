@@ -1,0 +1,162 @@
+{% extends 'header.html' %}
+{% block body %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+    crossorigin="anonymous"></script>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <form role="form">
+                <p class="text-center">
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#NewField" class="btn btn-primary">
+                        Insertar nuevo prestamo
+                    </button>
+                </p>
+            </form>
+        </div>
+
+        <div class="col-md-12">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for mensaje in messages %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" id="success-alert"> <strong>{{
+                    mensaje }}</strong> <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            {% block content%}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID prestamo</th>
+                        <th>ID estudiante</th>
+                        <th>ID libro</th>
+                        <th>Fecha prestamo</th>
+                        <th>Fecha devolución</th>
+                        <th>Estado</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in prestamos %}
+                    <tr>
+                        <td>{{ prestamo.0 }}</td>
+                        <td>{{ prestamo.1 }}</td>
+                        <td>{{ prestamo.2 }}</td>
+                        <td>{{ prestamo.3 }}</td>
+                        <td>{{ prestamo.4 }}</td>
+                        <td>{{ prestamo.5 }}</td>
+                        <td><button type="button" data-id="{{ prestamo.0 }}" class="usersInfoPrestamos btn btn-success"
+                                title="Detalles">Detalles</button></td>
+                    </tr>
+                    {% endfor%}
+                </tbody>
+            </table>
+            {% endblock%}
+        </div>
+    </div>
+
+    <div class="modal fade" id="NewField" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Nuevo prestamo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="insert_form" method="POST" action="/addprestamos">
+                    <div class="modal-body">
+                        <table class="table table-hover">
+                            <tr>
+                                <th>ID prestamo</th>
+                                <th><input type="text" name="idprestamo" id="idprestamo" class="form-control" required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>ID estudiante</th>
+                                <th><input type="text" name="id" id="id" class="form-control" required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>ID libro</th>
+                                <th><input type="text" name="idlibro" id="idlibro" class="form-control"
+                                        required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Fecha prestamo</th>
+                                <th><input type="text" name="fechaprestamo" id="fechaprestamo" class="form-control" required="true">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Fecha devolución</th>
+                                <th><input type="text" name="fechadevolucion" id="fechadevolucion" class="form-control" required="true"></th>
+                            </tr>
+                            <tr>
+                                <th>Estado</th>
+                                <th><input type="text" name="estadoprestamo" id="estadoprestamo" class="form-control" required="true">
+                                </th>
+                            </tr>
+
+                            <tr>
+                                <th colspan="2"><button type="submit" class="btn btn-primary">Registrar prestamo</button>
+                                </th>
+                            </tr>
+                        </table>
+                    </div>
+                </form>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="viewFieldP" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Vista de un prestamo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-cuerpo">
+
+                </div>
+
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#success-alert").fadeTo(3000, 500).slideUp(500, function () {
+            $("#success-alert").slideUp(500);
+        });
+        $('.usersInfoPrestamos').click(function () {
+            var idprestamo = $(this).data('id'); // Utiliza el atributo 'data-id'
+            $.ajax({
+                url: '/viewprestamos',
+                type: 'POST',
+                data: { idprestamo: idprestamo },
+                success: function (data) {
+                    $('.modal-cuerpo').html(data);
+                    $('.modal-cuerpo').append(data.htmlresponse);
+                    $('#viewFieldP').modal('show');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

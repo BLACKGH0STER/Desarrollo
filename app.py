@@ -68,8 +68,7 @@ def deleteestudiantes(estudiantesId):
         flash("Estudiante eliminado correctamente") 
         return redirect(url_for('main'))
 
-
-#Lo relacionado a las tabla libros:
+#Sobre libros
 @app.route('/libros')
 def libros():
     link = mysql.connection.cursor() 
@@ -105,7 +104,7 @@ def addlibros():
 @app.route('/updatelibros', methods=['POST'])
 def updatelibros():
     if request.method == 'POST':
-        libroId = request.form.get['idLibro']
+        libroId = request.form.get('idLibro')
         titulo = request.form['titulo']
         cantidad = request.form['cantidad']
         autor = request.form['autor']
@@ -127,6 +126,87 @@ def deletelibros(idLibro):
         link.close() 
         flash("Libro eliminado correctamente") 
         return redirect(url_for('libros'))
+
+#Sobre prestamos
+#Lo relacionado a las tabla prestamos:
+@app.route('/prestamos')
+def prestamos():
+    link = mysql.connection.cursor() 
+    link.execute("SELECT * FROM prestamos") 
+    data = link.fetchall()
+    return render_template('prestamos.html', prestamos=data)
+
+@app.route('/viewprestamos', methods=['POST','GET']) 
+def viewprestamos(): 
+    if request.method == 'POST': 
+        idprestamo = request.form.get('idprestamo')
+        link = mysql.connection.cursor() 
+        link.execute("SELECT * FROM prestamos WHERE idprestamo=%s", [idprestamo]) 
+        data = link.fetchall() 
+    return jsonify({'htmlresponse': render_template('viewprestamos.html', prestamos=data)})
+
+@app.route('/addprestamos', methods=['POST', 'GET'])
+def addprestamos():
+    if request.method == 'POST':
+        idprestamo = request.form['idprestamo']
+        idestudiante = request.form['id']
+        idlibro = request.form['idlibro']
+        fechaprestamo = request.form['fechaprestamo']
+        fechadevolucion = request.form['fechadevolucion']
+        estado = request.form['estadoprestamo']
+
+        # Actualiza la cantidad de libros disponibles
+        link = mysql.connection.cursor()
+        link.execute("SELECT cantidad FROM tblibros WHERE idlibro = %s", [idlibro])
+        cantidad = link.fetchone()[0]
+        
+        if cantidad> 0:
+            # Resta 1 a la cantidad disponible
+            cantidad -= 1
+            
+            # Actualiza la cantidad disponible en la tabla de libros
+            link.execute("UPDATE tblibros SET cantidad = %s WHERE idlibro = %s", (cantidad, idlibro))
+            
+            # Registra el préstamo en la tabla prestamos
+            link.execute('INSERT INTO prestamos(idprestamo, id, idlibro, fechaprestamo, fechadevolucion, estadoprestamo) VALUES(%s,%s,%s,%s,%s,%s)',
+                         (idprestamo, idestudiante, idlibro, fechaprestamo, fechadevolucion, estado))
+            
+            mysql.connection.commit()
+            link.close()
+            flash("préstamo registrado correctamente")
+        else:
+            flash("No hay libros disponibles con el ID especificado")
+    
+    return redirect(url_for('prestamos'))
+
+
+@app.route('/updateprestamos', methods=['POST'])
+def updateprestamos():
+    if request.method == 'POST':
+        prestamoId = request.form.get('idprestamo')
+        id = request.form['id'] 
+        idlibro = request.form['idlibro'] 
+        fechaprestamo = request.form['fechaprestamo'] 
+        fechadevolucion = request.form['fechadevolucion'] 
+        estado = request.form['estadoprestamo'] 
+        link = mysql.connection.cursor()
+        link.execute("UPDATE prestamos SET id=%s, idlibro=%s, fechaprestamo=%s, fechadevolucion=%s, estadoPrestamo=%s WHERE idprestamo=%s", (id, idlibro, fechaprestamo, fechadevolucion, estado, prestamoId))
+        mysql.connection.commit()
+        link.close()
+        flash("prestamo actualizado correctamente")
+        return redirect(url_for('prestamos'))
+    
+@app.route('/deleteprestamos/<string:idprestamo>', methods=['POST', 'GET'])
+def deleteprestamos(idprestamo): 
+    if request.method == 'GET': 
+        link = mysql.connection.cursor() 
+        sql = "DELETE FROM prestamos WHERE idprestamo=%s" 
+        idprestamos = (idprestamo, )
+        link.execute(sql, idprestamos) 
+        mysql.connection.commit() 
+        link.close() 
+        flash("prestamo eliminado correctamente") 
+        return redirect(url_for('prestamos'))
 
 if __name__=='__main__':
     app.secret_key = "crudpythonmysql"
