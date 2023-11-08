@@ -1,5 +1,6 @@
 from flask import (Flask, config, render_template, request, flash, json, send_file, session, jsonify, redirect, url_for)
 from flask_mysqldb import MySQL
+from MySQLdb import IntegrityError
 
 app = Flask(__name__)
 
@@ -9,6 +10,7 @@ app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'mydb'
 mysql = MySQL(app)
 
+#sobre estudiantes
 @app.route('/')
 def main():
     link = mysql.connection.cursor() 
@@ -24,12 +26,15 @@ def addestudiantes():
         apellido = request.form['apellido'] 
         edad = request.form['edad'] 
         carrera = request.form['carrera']
-        link = mysql.connection.cursor() 
-        link.execute('INSERT INTO tbestudiantes(id, nombre, apellido, edad, carrera) VALUES(%s,%s,%s,%s,%s)',
-                     (id, nombre, apellido, edad, carrera)) 
-        mysql.connection.commit() 
-        link.close() 
-        flash("Estudiante registrado correctamente") 
+        try:
+            link = mysql.connection.cursor() 
+            link.execute('INSERT INTO tbestudiantes(id, nombre, apellido, edad, carrera) VALUES(%s,%s,%s,%s,%s)',
+                         (id, nombre, apellido, edad, carrera)) 
+            mysql.connection.commit() 
+            link.close() 
+            flash("Estudiante registrado correctamente") 
+        except IntegrityError as e:
+            flash("Error al registrar el estudiante: Ya existe un estudiante con el mismo ID")
     return redirect(url_for('main'))
     
 @app.route('/viewestudiantes', methods=['POST','GET']) 
@@ -86,19 +91,24 @@ def viewlibros():
     return jsonify({'htmlresponse': render_template('viewlibros.html', libros=data)})
 
 @app.route('/addlibros', methods=['POST', 'GET'])
-def addlibros(): 
-    if request.method == 'POST': 
-        idLibro = request.form['idLibro'] 
-        titulo = request.form['titulo'] 
-        cantidad = request.form['cantidad'] 
-        autor = request.form['autor'] 
-        anio = request.form['anio'] 
-        link = mysql.connection.cursor() 
-        link.execute('INSERT INTO tblibros(idLibro, titulo, cantidad, autor, anio) VALUES(%s,%s,%s,%s,%s)',
-                     (idLibro, titulo, cantidad, autor, anio)) 
-        mysql.connection.commit() 
-        link.close() 
-        flash("Libro registrado correctamente") 
+def addlibros():
+    if request.method == 'POST':
+        idLibro = request.form['idLibro']
+        titulo = request.form['titulo']
+        cantidad = request.form['cantidad']
+        autor = request.form['autor']
+        anio = request.form['anio']
+
+        try:
+            link = mysql.connection.cursor()
+            link.execute('INSERT INTO tblibros(idLibro, titulo, cantidad, autor, anio) VALUES(%s,%s,%s,%s,%s)',
+                         (idLibro, titulo, cantidad, autor, anio))
+            mysql.connection.commit()
+            link.close()
+            flash("Libro registrado correctamente")
+        except IntegrityError as e:
+            flash("Error al registrar el libro: Ya existe un libro con el mismo ID")
+
     return redirect(url_for('libros'))
 
 @app.route('/updatelibros', methods=['POST'])
@@ -128,7 +138,6 @@ def deletelibros(idLibro):
         return redirect(url_for('libros'))
 
 #Sobre prestamos
-#Lo relacionado a las tabla prestamos:
 @app.route('/prestamos')
 def prestamos():
     link = mysql.connection.cursor() 
@@ -145,6 +154,7 @@ def viewprestamos():
         data = link.fetchall() 
     return jsonify({'htmlresponse': render_template('viewprestamos.html', prestamos=data)})
 
+
 @app.route('/addprestamos', methods=['POST', 'GET'])
 def addprestamos():
     if request.method == 'POST':
@@ -155,29 +165,29 @@ def addprestamos():
         fechadevolucion = request.form['fechadevolucion']
         estado = request.form['estadoprestamo']
 
-        # Actualiza la cantidad de libros disponibles
-        link = mysql.connection.cursor()
-        link.execute("SELECT cantidad FROM tblibros WHERE idlibro = %s", [idlibro])
-        cantidad = link.fetchone()[0]
+        try:
+            link = mysql.connection.cursor()
+            link.execute("SELECT cantidad FROM tblibros WHERE idlibro = %s", [idlibro])
+            cantidad = link.fetchone()[0]
+            
+            if cantidad > 0:
+                cantidad -= 1
+                link.execute("UPDATE tblibros SET cantidad = %s WHERE idlibro = %s", (cantidad, idlibro))
+                link.execute('INSERT INTO prestamos(idprestamo, id, idlibro, fechaprestamo, fechadevolucion, estadoprestamo) VALUES(%s,%s,%s,%s,%s,%s)',
+                             (idprestamo, idestudiante, idlibro, fechaprestamo, fechadevolucion, estado))
+                mysql.connection.commit()
+                link.close()
+                flash("préstamo registrado correctamente")
+            else:
+                flash("No hay libros disponibles con el ID especificado")
         
-        if cantidad> 0:
-            # Resta 1 a la cantidad disponible
-            cantidad -= 1
-            
-            # Actualiza la cantidad disponible en la tabla de libros
-            link.execute("UPDATE tblibros SET cantidad = %s WHERE idlibro = %s", (cantidad, idlibro))
-            
-            # Registra el préstamo en la tabla prestamos
-            link.execute('INSERT INTO prestamos(idprestamo, id, idlibro, fechaprestamo, fechadevolucion, estadoprestamo) VALUES(%s,%s,%s,%s,%s,%s)',
-                         (idprestamo, idestudiante, idlibro, fechaprestamo, fechadevolucion, estado))
-            
-            mysql.connection.commit()
-            link.close()
-            flash("préstamo registrado correctamente")
-        else:
-            flash("No hay libros disponibles con el ID especificado")
-    
+        except IntegrityError as e:
+            flash("Error al registrar el préstamo: Ya existe un préstamo con el mismo ID")
+
+        except Exception as e:
+            flash("Error al registrar el préstamo: El ID de estudiante o libro no existe")
     return redirect(url_for('prestamos'))
+
 
 
 @app.route('/updateprestamos', methods=['POST'])
