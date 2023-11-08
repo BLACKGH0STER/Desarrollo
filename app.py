@@ -10,7 +10,7 @@ app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'mydb'
 mysql = MySQL(app)
 
-#sobre estudiantes
+#Sobre estudiantes:
 @app.route('/')
 def main():
     link = mysql.connection.cursor() 
@@ -60,18 +60,26 @@ def updateestudiantes():
         link.close()
         flash("Estudiante actualizado correctamente")
         return redirect(url_for('main'))
-
+    
 @app.route('/deleteestudiantes/<string:estudiantesId>', methods=['POST', 'GET'])
 def deleteestudiantes(estudiantesId): 
     if request.method == 'GET': 
-        link = mysql.connection.cursor() 
-        sql = "DELETE FROM tbestudiantes WHERE id=%s" 
-        estudiantesId = (estudiantesId, )
-        link.execute(sql, estudiantesId) 
-        mysql.connection.commit() 
-        link.close() 
-        flash("Estudiante eliminado correctamente") 
-        return redirect(url_for('main'))
+        try:
+            link = mysql.connection.cursor() 
+            sql = "DELETE FROM tbestudiantes WHERE id=%s" 
+            estudiantesId = (estudiantesId, )
+            link.execute(sql, estudiantesId) 
+            mysql.connection.commit() 
+            link.close() 
+            flash("Estudiante eliminado correctamente") 
+            return redirect(url_for('main'))
+        except IntegrityError as e:
+            flash("No se puede eliminar el estudiante, ya que está asociado a la tabla de préstamos")
+            return redirect(url_for('main'))  
+        except Exception as e:
+            flash("Error al eliminar el estudiante")
+            return redirect(url_for('main')) 
+
 
 #Sobre libros
 @app.route('/libros')
@@ -125,17 +133,25 @@ def updatelibros():
         link.close()
         flash("Libro actualizado correctamente")
         return redirect(url_for('libros'))
+    
 @app.route('/deletelibros/<string:idLibro>', methods=['POST', 'GET'])
 def deletelibros(idLibro): 
     if request.method == 'GET': 
-        link = mysql.connection.cursor() 
-        sql = "DELETE FROM tblibros WHERE idLibro=%s" 
-        idLibros = (idLibro, )
-        link.execute(sql, idLibros) 
-        mysql.connection.commit() 
-        link.close() 
-        flash("Libro eliminado correctamente") 
-        return redirect(url_for('libros'))
+        try:
+            link = mysql.connection.cursor() 
+            sql = "DELETE FROM tblibros WHERE idLibro=%s" 
+            idLibros = (idLibro, )
+            link.execute(sql, idLibros) 
+            mysql.connection.commit() 
+            link.close() 
+            flash("Libro eliminado correctamente") 
+            return redirect(url_for('libros'))
+        except IntegrityError as e:
+            flash("No se puede eliminar el libro, ya que está asociado a la tabla de préstamos")
+            return redirect(url_for('libros'))
+        except Exception as e:
+            flash("Error al eliminar el estudiante")
+            return redirect(url_for('main'))
 
 #Sobre prestamos
 @app.route('/prestamos')
@@ -153,7 +169,6 @@ def viewprestamos():
         link.execute("SELECT * FROM prestamos WHERE idprestamo=%s", [idprestamo]) 
         data = link.fetchall() 
     return jsonify({'htmlresponse': render_template('viewprestamos.html', prestamos=data)})
-
 
 @app.route('/addprestamos', methods=['POST', 'GET'])
 def addprestamos():
@@ -177,18 +192,16 @@ def addprestamos():
                              (idprestamo, idestudiante, idlibro, fechaprestamo, fechadevolucion, estado))
                 mysql.connection.commit()
                 link.close()
-                flash("préstamo registrado correctamente")
+                flash("Préstamo registrado correctamente")
             else:
                 flash("No hay libros disponibles con el ID especificado")
         
         except IntegrityError as e:
-            flash("Error al registrar el préstamo: Ya existe un préstamo con el mismo ID")
+            flash("Error al registrar el préstamo")
 
         except Exception as e:
             flash("Error al registrar el préstamo: El ID de estudiante o libro no existe")
     return redirect(url_for('prestamos'))
-
-
 
 @app.route('/updateprestamos', methods=['POST'])
 def updateprestamos():
@@ -199,12 +212,20 @@ def updateprestamos():
         fechaprestamo = request.form['fechaprestamo'] 
         fechadevolucion = request.form['fechadevolucion'] 
         estado = request.form['estadoprestamo'] 
-        link = mysql.connection.cursor()
-        link.execute("UPDATE prestamos SET id=%s, idlibro=%s, fechaprestamo=%s, fechadevolucion=%s, estadoPrestamo=%s WHERE idprestamo=%s", (id, idlibro, fechaprestamo, fechadevolucion, estado, prestamoId))
-        mysql.connection.commit()
-        link.close()
-        flash("prestamo actualizado correctamente")
+
+        try:
+            link = mysql.connection.cursor()
+            link.execute("UPDATE prestamos SET id=%s, idlibro=%s, fechaprestamo=%s, fechadevolucion=%s, estadoPrestamo=%s WHERE idprestamo=%s", (id, idlibro, fechaprestamo, fechadevolucion, estado, prestamoId))
+            mysql.connection.commit()
+            link.close()
+            flash("Préstamo actualizado correctamente")
+        except IntegrityError as e:
+            flash("Error al actualizar el préstamo: El ID de estudiante o libro no existe")
+        except Exception as e:
+            flash("Error al actualizar el préstamo")
+        
         return redirect(url_for('prestamos'))
+
     
 @app.route('/deleteprestamos/<string:idprestamo>', methods=['POST', 'GET'])
 def deleteprestamos(idprestamo): 
@@ -215,7 +236,7 @@ def deleteprestamos(idprestamo):
         link.execute(sql, idprestamos) 
         mysql.connection.commit() 
         link.close() 
-        flash("prestamo eliminado correctamente") 
+        flash("Préstamo eliminado correctamente") 
         return redirect(url_for('prestamos'))
 
 if __name__=='__main__':

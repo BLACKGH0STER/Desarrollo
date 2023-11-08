@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-11-2023 a las 16:29:58
+-- Tiempo de generación: 08-11-2023 a las 16:51:14
 -- Versión del servidor: 10.4.25-MariaDB
 -- Versión de PHP: 7.4.30
 
@@ -41,9 +41,7 @@ CREATE TABLE `prestamos` (
 --
 
 INSERT INTO `prestamos` (`idprestamo`, `id`, `idlibro`, `fechaprestamo`, `fechadevolucion`, `estadoprestamo`) VALUES
-(1, 2025, 1, '1000-01-01', '1000-01-01', 'Prestamo'),
-(2, 2025, 3, '1000-01-01', '1000-01-01', 'Prestamo'),
-(3, 2025, 1, '1000-01-01', '1000-01-01', 'devuelto');
+(1, 832624, 2523, '1000-01-01', '1000-01-01', 'Prestamo');
 
 -- --------------------------------------------------------
 
@@ -64,7 +62,8 @@ CREATE TABLE `tbestudiantes` (
 --
 
 INSERT INTO `tbestudiantes` (`id`, `nombre`, `apellido`, `edad`, `carrera`) VALUES
-(2025, 'Camilo', 'Castro', 5, 'ing sistemas');
+(832624, 'Ernesto', 'Molina', 18, 'Ing. Industrial'),
+(836529, 'Francisco', 'Ayala', 25, 'Ing. sistemas');
 
 -- --------------------------------------------------------
 
@@ -85,12 +84,8 @@ CREATE TABLE `tblibros` (
 --
 
 INSERT INTO `tblibros` (`idLibro`, `titulo`, `cantidad`, `autor`, `anio`) VALUES
-(1, '2', 0, '1', 1),
-(3, 'asdfas', 1, 'yo', 2024),
-(4, 'simañanamevoy', 5, 'el', 2025),
-(5, 'idk', 2, 'h', 3),
-(6, 'a', 0, 'c', 0),
-(8, 'f', 2, 'a', 2005);
+(2324, 'Rayuela', 2, 'Julio Cortázar', 1963),
+(2523, 'Cien años de soledad', 4, 'Gabriel Garcia Márquez', 1967);
 
 --
 -- Índices para tablas volcadas
